@@ -45,6 +45,6 @@ setup(
         "Documentation": REPO_URL + "-/blob/master/README.md#name",
         "Source Code": REPO_URL,
     },
-    py_modules=[ "citty.py", ],
+    py_modules=[ "citty", ],
     version=citty.__version__,
 )
