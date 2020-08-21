@@ -6,8 +6,17 @@
 
     $ $EDITOR citty.py  # Configure your project directories
 
+    $ python citty.py add ~/projects/foo 
+    # Add a project. The "name" is the last directory ("foo")
+
+    $ python citty.py delete foo
+    # Delete a project by name
+
+    $ python citty.py add ~/projects/foo --name fubar
+    # Add a project and override the name
+
     $ python citty.py
-    project1 | project2 | ...	# These have color!
+    project1 | fubar       # <-- displayed in colors
 
 # DESCRIPTION
 
