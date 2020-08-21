@@ -47,7 +47,7 @@ COMMAND = "command"
 DELETE = "delete"
 FAILING = "FAILING"
 LIST = "list"
-MAKE_TEST = "make test"
+MAKE_TEST = "make_test"
 NAME = "name"
 NORMAL = "NORMAL"
 PASSING = "PASSING"
@@ -135,9 +135,12 @@ def citty_list(arguments):
 def citty_loop(arguments):
     """ Run a continuous-integration loop, forever. """
     while True:
-        config = load_config()
-        ci_build(config)
-        time.sleep(config[SLEEP])
+        try:
+            config = load_config()
+            ci_build(config)
+            time.sleep(config[SLEEP])
+        except KeyboardInterrupt:
+            break
 
 
 def config_file_path() -> Path:
@@ -205,7 +208,7 @@ def make_test(project):
     kwargs = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if project[PATH] is not None:
         kwargs["cwd"] = project[PATH]
-    argv_list = """make test""".strip().split()
+    argv_list = "make test".strip().split()
     try:
         rc = subprocess.run(argv_list, **kwargs)
         retcode = rc.returncode
