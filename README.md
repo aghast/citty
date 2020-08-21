@@ -11,6 +11,13 @@
 
 ## 1,000 words or more
 
+Here's a video of `citty` running inside a `:terminal` window
+in Gvim (version 8!), using three "projects" that are really
+symlinks to the same directory. And a `make test` that just
+uses the Bash `$RANDOM` value to flip a coin to determine
+success or failure. (But it's really colorful!)
+
+
 ![Video of citty running in Gvim](/etc/citty-in-gvim.gif?raw=true "Citty running in Gvim terminal")
 
 # DESCRIPTION
