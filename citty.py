@@ -10,6 +10,7 @@
       citty add <path> [--name=<name>] [-f | --force]
       citty delete <name>
       citty delete --all
+      citty list [<name> | <path>]
       citty -h | --help
       citty --version
       citty
@@ -29,6 +30,7 @@ import sys
 import time
 
 from pathlib import Path
+from pkg_resources import iter_entry_points as iter_ep
 
 from docopt import docopt
 
@@ -44,6 +46,7 @@ APPDATA = "APPDATA"
 COMMAND = "command"
 DELETE = "delete"
 FAILING = "FAILING"
+LIST = "list"
 MAKE_TEST = "make test"
 NAME = "name"
 NORMAL = "NORMAL"
@@ -54,12 +57,17 @@ PROJECTS = "projects"
 SLEEP = "sleep"
 SLEEP_TIME = 60
 STATUS = "status"
+TESTFUNCS = "testfuncs"
 VERSION = "citty version " + __version__
 XDG_CONFIG_HOME = "XDG_CONFIG_HOME"
 
 
 def citty_add(arguments):
-    """ Add a project to citty config file. """
+    """ Subcommand: 'add'.
+
+        Add a project to the citty config file.
+
+    """
     assert arguments[ADD], "'citty add' should be the command line"
     assert arguments["<path>"], "<path> must be specified"
     name = arguments["--name"]
@@ -80,8 +88,12 @@ def citty_add(arguments):
 
 
 def citty_delete(arguments):
-    """ Delete a project, or all projects, from the config. """
-    assert arguments[DELETE], "'citty delete' must be specified"
+    """ Subcommand: 'delete'.
+
+        Delete a project, or all projects, from the citty config file.
+
+    """
+    assert arguments[DELETE], "'citty delete' must be specified."
     config = load_config()
     projects = config[PROJECTS]
     if arguments["--all"]:
@@ -92,10 +104,31 @@ def citty_delete(arguments):
     save_config(config)
 
 
+def citty_list(arguments):
+    """ Subcommand: 'list'.
+
+        List all projects, or projects matching a name, from the citty
+        config file.
+
+    """
+    assert arguments[LIST], "'citty list' must be specified."
+    config = load_config()
+
+    name = arguments["<name>"]
+
+    for project in config[PROJECTS]:
+        path = project[PATH]
+        if name and not (name == project[NAME]
+            or path.startswith(name)
+            or name in path):
+            continue
+        print("{:>15s} : {:<10s} : {}".format(project[NAME], project[COMMAND], path))
+
+
 def citty_loop(arguments):
     """ Run a continuous-integration loop, forever. """
-    config = load_config()
     while True:
+        config = load_config()
         ci_build(config)
         time.sleep(config[SLEEP])
 
@@ -131,22 +164,33 @@ def config_file_path() -> Path:
     raise NotADirectoryError("Could not find a location to load/store" " config data.")
 
 
+def load_testfuncs():
+    """ Load the entry points for test functions, build a name: function
+        mapping and return it.
+
+    """
+    testfuncs = {ep.name: ep.load() for ep in iter_ep("citty_test_funcs")}
+    return testfuncs
+
+
 def load_config():
     """ Load json config file data, if file exists."""
     cfp = config_file_path()
     if not cfp.exists():
-        return {SLEEP: SLEEP_TIME, PROJECTS: []}
+        config = {SLEEP: SLEEP_TIME, PROJECTS: []}
     with open(cfp) as cfg:
         config = json.load(cfg)
     config[PROJECTS].sort(key=lambda x: x[NAME])
+    config[TESTFUNCS] = load_testfuncs()
     return config
 
 
 def save_config(config):
     """ Write json config file data. """
     cfp = config_file_path()
+    dump_config = {k: v for k, v in config if k != TESTFUNCS}
     with open(cfp, "w") as cf:
-        json.dump(config, cf)
+        json.dump(dump_config, cf)
 
 
 def make_test(project):
@@ -154,7 +198,6 @@ def make_test(project):
     kwargs = dict(stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if project[PATH] is not None:
         kwargs["cwd"] = project[PATH]
-
     argv_list = """make test""".strip().split()
     try:
         rc = subprocess.run(argv_list, **kwargs)
@@ -181,7 +224,7 @@ def show_status(config):
 
     stats = [
         "{} {} {}".format(colors[proj[STATUS]], proj[NAME], colors[NORMAL])
-            for proj in config[PROJECTS]
+        for proj in config[PROJECTS]
     ]
     stats_line = " | ".join(stats)
     print(stats_line, end="\r")
@@ -189,15 +232,11 @@ def show_status(config):
 
 def ci_build(config):
     """ Do one pass through all projects, updating status. """
-    test_funcs = {
-        MAKE_TEST: make_test,
-    }
-
     for project in config[PROJECTS]:
         project[STATUS] = PENDING
         show_status(config)
         command = project[COMMAND]
-        rc = test_funcs[command](project)
+        rc = config[TESTFUNCS][command](project)
         project[STATUS] = PASSING if rc == 0 else FAILING
         show_status(config)
 
@@ -208,6 +247,7 @@ def main():
     ops = {
         ADD: citty_add,
         DELETE: citty_delete,
+        LIST: citty_list,
     }
 
     for cmd, fn in ops.items():
