@@ -1,10 +1,14 @@
 #! /usr/bin/env python3
 # vim: fileencoding: utf-8
+#
+# Copyright 2020, aghast <aghast@aghast.dev>. All rights reserved.
+# License is GPL3+. See "LICENSE" file.
+#
 """ citty.py -- CI driver in your terminal.
 
-    Implements basic test & wait continuous integration,
-    and codes the results to stdout using color escape
-    sequences.
+    Implements basic test & wait continuous integration, and codes
+    the results to stdout using color escape sequences.
+
 """
 import os
 import pathlib
