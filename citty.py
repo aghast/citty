@@ -34,7 +34,7 @@ from pkg_resources import iter_entry_points as iter_ep
 
 from docopt import docopt
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 ON_WINDOWS = platform.system() == "Windows"
 
