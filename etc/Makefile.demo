@@ -1,0 +1,7 @@
+# Makefile that uses $RANDOM to "flip a coin" to determine the status of
+# `make test`. This was used to create a video demo of citty project
+# status changing.
+#
+test:
+	bash -c '(( $$RANDOM % 2 == 0 )); exit $$?'
+
