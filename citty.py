@@ -16,7 +16,7 @@ import subprocess
 import time
 
 PROJECTS = [ ".", "../myproj", "../myproj2" ]
-SLEEP_TIME = 60
+SLEEP_TIME = 5
 
 ESC_BGCOLOR = "\x1B[{};48;5;{}m"
 BG_RED = ESC_BGCOLOR.format(37, 196)
@@ -41,7 +41,6 @@ def get_projects():
         if not name:
             name = pathlib.Path(ppath).resolve().name
 
-        print(ppath, " name = ", name)
         projects[name] = {
             "path": ppath,
             "status": None,

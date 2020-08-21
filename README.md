@@ -9,6 +9,10 @@
     $ python citty.py
     project1 | project2 | ...	# These have color!
 
+## 1,000 words or more
+
+![Video of citty running in Gvim](/etc/citty-in-gvim.gif?raw=true "Citty running in Gvim terminal")
+
 # DESCRIPTION
 
 Remember the mantra of Test-Driven Development (TDD)? 
