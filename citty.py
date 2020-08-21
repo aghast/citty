@@ -71,7 +71,7 @@ def citty_add(arguments):
     assert arguments[ADD], "'citty add' should be the command line"
     assert arguments["<path>"], "<path> must be specified"
     name = arguments["--name"]
-    path = Path(arguments["<path>"]).resolve()
+    path = Path(arguments["<path>"]).expanduser().resolve()
     if not name:
         name = path.name
     config = load_config()
@@ -115,6 +115,7 @@ def citty_list(arguments):
     config = load_config()
 
     name = arguments["<name>"]
+    homedir = Path().home().resolve()
 
     for project in config[PROJECTS]:
         path = project[PATH]
@@ -122,7 +123,13 @@ def citty_list(arguments):
             or path.startswith(name)
             or name in path):
             continue
-        print("{:>15s} : {:<10s} : {}".format(project[NAME], project[COMMAND], path))
+        try:
+            hp = Path(path).relative_to(homedir)
+            disp = "~" / hp
+        except ValueError:
+            disp = path
+        print("{:>15s} : {:<10s} : {}".format(
+            project[NAME], project[COMMAND], disp))
 
 
 def citty_loop(arguments):
@@ -188,7 +195,7 @@ def load_config():
 def save_config(config):
     """ Write json config file data. """
     cfp = config_file_path()
-    dump_config = {k: v for k, v in config if k != TESTFUNCS}
+    dump_config = {k: v for k, v in config.items() if k != TESTFUNCS}
     with open(cfp, "w") as cf:
         json.dump(dump_config, cf)
 
