@@ -38,9 +38,9 @@ success or failure. (But it's really colorful!)
 
 There is a subtle and nuanced coding system:
 
-  * Green - It's all good!
-  * Yellow - Running tests, please stand by.
-  * Red - Shit's broke.
+  * Green - Failure is not an option!
+  * Yellow - Hold my beer while I pass these tests!
+  * Red - Turns out, failure *is* an option!
 
 ## Status
 
